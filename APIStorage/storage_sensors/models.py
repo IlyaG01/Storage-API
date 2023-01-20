@@ -37,7 +37,7 @@ class Schedule(models.Model):
 
 
 class SensorsData(models.Model):
-    value = models.CharField(max_length=20)
+    value = models.FloatField()
     date = models.DateTimeField(auto_now_add = True)
     sensor = models.ForeignKey('Sensors', on_delete=models.PROTECT, null = True)
 
@@ -71,7 +71,6 @@ class Prediction(models.Model):
     type_alert = models.CharField(max_length=20)
     description = models.CharField(max_length=200)
     datetime = models.DateTimeField(auto_now_add = True)
-    # detail = models.CharField(max_length=500000)
     detail = models.TextField()
 
     def __str__(self):
