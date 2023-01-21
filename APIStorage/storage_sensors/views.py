@@ -7,84 +7,51 @@ from .models import *
 from .bot import send_message_to_employee
 import json
 import datetime
-# from .handler_request import get_data
-# Create your views here.
 
-def correct_machine(request):
-        all_machines = Machines.objects.all()
-        types = []
-        [types.append(j.name) for j in all_machines]
-        try:
-            if request.data["machine"] in types:
-                response = True
-            else:
-                response = False
-        except KeyError:
+def define_name(data_name):
+    if data_name == "machine":
+        all = Machines.objects.all()
+    if data_name == "data_type":
+        all = SensorsType.objects.all()
+    if data_name == "name":
+        all = Sensors.objects.all()
+    if data_name == "login":
+        all = Employee.objects.all()
+    return all
+
+
+def check_data_name(request, data_name):
+    all = define_name(data_name)
+    types = []
+    [types.append(j.name) for j in all]
+    try:
+        if request.data[data_name] in types:
+            response = True
+        else:
             response = False
-        return response
+    except KeyError:
+        response = False
+    return response
 
-def correct_type(request):
-        all_types = SensorsType.objects.all()
-        types = []
-        [types.append(j.name) for j in all_types]
-        try:
-            if request.data["data_type"] in types:
-                response = True
-            else:
-                response = False
-
-        except KeyError:
-            response = False
-        return response
-
-def correct_sensor_name(request):
-        all_sensor_name = Sensors.objects.all()
-        types = []
-        [types.append(j.name) for j in all_sensor_name]
-        try:
-            if request.data["name"] in types:
-                response = True
-            else:
-                response = False
-        except KeyError:
-            response = False
-        return response
-
-def correct_login(request):
-        all_employees = Employee.objects.all()
-        types = []
-        [types.append(j.login) for j in all_employees]
-        try:
-            if request.data["login"] in types:
-                response = True
-            else:
-                response = False
-        except KeyError:
-            response = False
-        return response
-
-def correct_employee_name(request):
-        all_employees = Employee.objects.all()
-        first_name = []
-        last_name = []
-        try:
-            f_user = str(request.data["to_whom"]).split()[0]
-            l_user = str(request.data["to_whom"]).split()[1]
-            [first_name.append(j.first_name) for j in all_employees]
-            [last_name.append(i.last_name) for i in all_employees]
-            if f_user in first_name and l_user in last_name:
-                response = True
-        except KeyError:
-            response = False
-        return response
-
-
+def check_employee_name(request):
+    all_employees = Employee.objects.all()
+    first_name = []
+    last_name = []
+    try:
+        f_user = str(request.data["to_whom"]).split()[0]
+        l_user = str(request.data["to_whom"]).split()[1]
+        [first_name.append(j.first_name) for j in all_employees]
+        [last_name.append(i.last_name) for i in all_employees]
+        if f_user in first_name and l_user in last_name:
+            response = True
+    except KeyError:
+        response = False
+    return response
 
 
 class SensorsDataAPIView(APIView):
-   
     def post(self, request):
-        if request.data and correct_type(request):
+        if request.data and check_data_name(request, "data_type"):
             result_time = datetime.datetime.strptime(request.data["date_from"][:-5], '%Y-%m-%dT%H:%M:%S')
             result_time_end = datetime.datetime.strptime(request.data["date_to"][:-5], '%Y-%m-%dT%H:%M:%S')
             sensors_id = SensorsType.objects.filter(name = request.data["data_type"])[0].id
@@ -104,7 +71,7 @@ class SensorsDataAPIView(APIView):
 
 class SensorsDataMachineAPIView(APIView):
     def post(self, request):
-        if request.data and correct_machine(request):
+        if request.data and check_data_name(request, "machine"):
             result_time = datetime.datetime.strptime(request.data["date_from"][:-5], '%Y-%m-%dT%H:%M:%S')
             result_time_end = datetime.datetime.strptime(request.data["date_to"][:-5], '%Y-%m-%dT%H:%M:%S')
             machine_id = Machines.objects.filter(name = request.data["machine"])[0].id
@@ -137,7 +104,6 @@ class SensorsTypeAPIView(APIView):
 
 
 class SensorsAPIView(APIView):
-    
     def get(self, request):
         array = []
         a = SensorsSerializer(Sensors.objects.all(), many = True).data
@@ -151,19 +117,19 @@ class SensorsAPIView(APIView):
     def post(self, request):
         array = []
         a = SensorsSerializer(Sensors.objects.all(), many = True).data
-        if correct_type(request):
+        if check_data_name(request, "data_type"):
             type_id = SensorsType.objects.filter(name = request.data["data_type"])[0].id
             w = Sensors.objects.filter(type = type_id)
             [array.append({"name_sensor": str(j.name), "machine": str(j.machine)}) for j in w]
             return Response(array)
         
-        if correct_machine(request):
+        if check_data_name(request, "machine"):
             machine_id = Machines.objects.filter(name = request.data["machine"])[0].id
             w = Sensors.objects.filter(machine = machine_id)
             [array.append({"name_sensor": str(j.name), "data_type": str(j.type)}) for j in w]
             return Response(array)
         
-        if correct_sensor_name(request):
+        if check_data_name(request, "name"):
             j = Sensors.objects.filter(name = request.data["name"])[0]
             w = {}
             w["type"] = j.type.name
@@ -178,7 +144,7 @@ class SensorsAPIView(APIView):
 class EmployeeAPIView(APIView):
     def get(self, request):
         if request.data:
-            if correct_login(request):
+            if check_data_name(request, "login"):
                 user = Employee.objects.filter(login = str(request.data["login"]))[0]
                 position = user.position.name
                 work_schedule = user.work_schedule.name
@@ -262,7 +228,7 @@ class NotificationAPIView(APIView):
         return Response(w)
 
     def post(self, request):
-        if request.data and correct_employee_name(request):
+        if request.data and check_employee_name(request):
             user_id = Employee.objects.filter(first_name = str(request.data["to_whom"]).split()[0], last_name = str(request.data["to_whom"]).split()[1])[0].telegram_id
             send_message_to_employee(user_id, request.data["from_whom"], request.data["text_message"])
             return Response({'post': 'successfully'})
@@ -285,7 +251,7 @@ class FullScheduleAPIView(APIView):
         return Response(array)
     
     def post(self, request):
-        if correct_employee_name(request):
+        if check_employee_name(request):
             w = {}
             user_id = Employee.objects.filter(first_name = str(request.data["name"]).split()[0], last_name = str(request.data["name"]).split()[1])[0]
             machine = Machines.objects.filter(id = Area_of_Responsibility.objects.filter(employee_id = user_id.id)[0].id)[0]
