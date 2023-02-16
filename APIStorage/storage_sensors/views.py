@@ -22,8 +22,7 @@ def define_name(data_name):
 
 def check_data_name(request, data_name):
     all = define_name(data_name)
-    types = []
-    [types.append(j.name) for j in all]
+    types = [j.name for j in all]
     try:
         if request.data[data_name] in types:
             response = True
@@ -35,13 +34,11 @@ def check_data_name(request, data_name):
 
 def check_employee_name(request):
     all_employees = Employee.objects.all()
-    first_name = []
-    last_name = []
+    first_name = [j.first_name for j in all_employees]
+    last_name = [i.last_name for i in all_employees]
     try:
         f_user = str(request.data["to_whom"]).split()[0]
-        l_user = str(request.data["to_whom"]).split()[1]
-        [first_name.append(j.first_name) for j in all_employees]
-        [last_name.append(i.last_name) for i in all_employees]
+        l_user = str(request.data["to_whom"]).split()[1]       
         if f_user in first_name and l_user in last_name:
             response = True
     except KeyError:
@@ -91,8 +88,7 @@ class SensorsDataMachineAPIView(APIView):
 class SensorsTypeAPIView(APIView):
     def get(self, request):
         w = SensorsType.objects.all()
-        types = []
-        [types.append(j.name) for j in w]
+        types = [j.name for j in w]        
         return Response(types)
     
     def post(self, request):
@@ -116,7 +112,6 @@ class SensorsAPIView(APIView):
     
     def post(self, request):
         array = []
-        a = SensorsSerializer(Sensors.objects.all(), many = True).data
         if check_data_name(request, "data_type"):
             type_id = SensorsType.objects.filter(name = request.data["data_type"])[0].id
             w = Sensors.objects.filter(type = type_id)
@@ -177,8 +172,7 @@ class EmployeeAPIView(APIView):
 class PositionAPIView(APIView):
     def get(self, request):
         w = Positions.objects.all()
-        types = []
-        [types.append(j.name) for j in w]
+        types = [j.name for j in w]
         return Response(types)
     
     def post(self, request):
@@ -191,8 +185,7 @@ class PositionAPIView(APIView):
 class ScheduleAPIView(APIView):
     def get(self, request):
         w = Schedule.objects.all()
-        types = []
-        [types.append(j.name) for j in w]
+        types = [j.name for j in w]        
         return Response(types)
     
     def post(self, request):
@@ -205,8 +198,7 @@ class ScheduleAPIView(APIView):
 class MachineAPIView(APIView):
     def get(self, request):
         w = Machines.objects.all()
-        types = []
-        [types.append(j.name) for j in w]
+        types = [j.name for j in w]
         return Response(types)
     
     def post(self, request):
@@ -220,12 +212,8 @@ class MachineAPIView(APIView):
 class NotificationAPIView(APIView):
     def get(self, request):
         w = Employee.objects.all()
-        all = []
-        for j in w:
-            all.append(str(j.first_name + " " + j.last_name))
-            print(all)
-        w = all
-        return Response(w)
+        all = [str(j.first_name + " " + j.last_name) for j in w]
+        return Response(all)
 
     def post(self, request):
         if request.data and check_employee_name(request):
@@ -266,15 +254,9 @@ class FullScheduleAPIView(APIView):
 
 class PredictionAPIView(APIView):
     def post(self, request):
-        result_time = datetime.datetime.strptime(request.data["date_from"][:-5], '%Y-%m-%dT%H:%M:%S')
-        result_time_end = datetime.datetime.strptime(request.data["date_to"][:-5], '%Y-%m-%dT%H:%M:%S')
+        result_time = datetime.datetime.strptime(request.data["date_from"], '%Y-%m-%dT%H:%M:%S')
+        result_time_end = datetime.datetime.strptime(request.data["date_to"], '%Y-%m-%dT%H:%M:%S')
         s1 = Prediction.objects.filter(datetime__range = [result_time, result_time_end])
-        w1=[]
-        for i in s1:
-            print(i)
-            # w1 = PredictionSerializer(i, many = True).data
-            w1.append(i)
-            print(w1)
+        w1=[i for i in s1]
         w = PredictionSerializer(w1, many = True).data
-        print(len(w))
         return Response(w)
