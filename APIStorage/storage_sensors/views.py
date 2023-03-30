@@ -87,7 +87,7 @@ class SensorsDataMachineAPIView(APIView):
 
 class SensorsTypeAPIView(APIView):
     def get(self, request):
-        w = SensorsType.objects.all()
+        w = SensorsType.objects.all().order_by("name")
         types = [j.name for j in w]        
         return Response(types)
     
@@ -151,7 +151,7 @@ class EmployeeAPIView(APIView):
             else:
                 w=[]
         else:
-            w = Employee.objects.all()
+            w = Employee.objects.all().order_by("last_name")
             all = []
             for j in w:
                 w1 = EmployeeSerializer(j).data
@@ -171,7 +171,7 @@ class EmployeeAPIView(APIView):
 
 class PositionAPIView(APIView):
     def get(self, request):
-        w = Positions.objects.all()
+        w = Positions.objects.all().order_by("name")
         types = [j.name for j in w]
         return Response(types)
     
@@ -197,7 +197,7 @@ class ScheduleAPIView(APIView):
 
 class MachineAPIView(APIView):
     def get(self, request):
-        w = Machines.objects.all()
+        w = Machines.objects.all().order_by("name")
         types = [j.name for j in w]
         return Response(types)
     
@@ -211,7 +211,7 @@ class MachineAPIView(APIView):
 
 class NotificationAPIView(APIView):
     def get(self, request):
-        w = Employee.objects.all()
+        w = Employee.objects.all().order_by("last_name")
         all = [str(j.first_name + " " + j.last_name) for j in w]
         return Response(all)
 
