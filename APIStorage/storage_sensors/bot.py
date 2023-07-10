@@ -3,7 +3,7 @@ from telebot.apihelper import ApiTelegramException
 from telebot.types import Message
 
 import config 
-# bot = TeleBot('5820478963:AAE_aB8MChXuui0_CHraTWtfpEjtM-0iHxI')
+
 bot = TeleBot(config.TELEGRAM_BOT_TOKEN)
 
 def send_message_to_employee(user_id: int, user_from_whom:str, text: str):

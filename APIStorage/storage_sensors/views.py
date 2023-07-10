@@ -8,7 +8,7 @@ from .bot import send_message_to_employee
 import json
 import datetime
 
-def define_name(data_name):
+def define_name(data_name: str):
     if data_name == "machine":
         all = Machines.objects.all()
     if data_name == "data_type":
@@ -20,7 +20,7 @@ def define_name(data_name):
     return all
 
 
-def check_data_name(request, data_name):
+def check_data_name(request, data_name: str):
     all = define_name(data_name)
     types = [j.name for j in all]
     try:
